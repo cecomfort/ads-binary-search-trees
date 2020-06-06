@@ -104,63 +104,201 @@ dataStructures.forEach(TargetDS => {
 
     describe('delete', () => {
       it('returns the value for the removed record', () => {
-
+        bst.insert('test', 'first value');
+        expect(bst.delete('test')).toBe('first value');
       });
 
       it('returns undefined if the record was not found', () => {
-
+        expect(bst.delete('record')).toBe(undefined);
       });
 
       it('reduces the count by 1', () => {
-
+        bst.insert('test', 'first value');
+        expect(bst.count()).toBe(1);
+        bst.delete('test');
+        expect(bst.count()).toBe(0);
       });
 
       it('omits the removed record from iteration results', () => {
+        const keys = ['keys', 'for', 'this', 'tree'];
+        keys.forEach(key => bst.insert(key));
 
+        bst.delete('for');
+        const cb = jest.fn();
+        bst.forEach(cb);
+
+        expect(cb.mock.calls.length).toBe(keys.length - 1);
+        expect(cb.mock.calls[0][0].key).toBe('keys');
+        expect(cb.mock.calls[1][0].key).toBe('this');
+        expect(cb.mock.calls[2][0].key).toBe('tree');
       });
 
       it('can remove every element in a tree', () => {
+        const keys = ['keys', 'for', 'this', 'tree'];
+        keys.forEach(key => bst.insert(key));
+        expect(bst.count()).toBe(4);
 
+        keys.forEach(key => bst.delete(key));
+        expect(bst.count()).toBe(0);
       });
 
       describe('scenarios', () => {
+        let records;
+        beforeEach(() => {
+          records = [
+            { key: 'o', value: 'first' },
+            { key: 'h', value: 'second' },
+            { key: 't', value: 'third' },
+            { key: 'd', value: 'fourth' },
+            { key: 'k', value: 'fifth' },
+            { key: 'a', value: 'sixth' },
+            { key: 'r', value: 'seventh' },
+            { key: 'w', value: 'eighth' },
+            { key: 'v', value: 'ninth' },
+            { key: 'y', value: 'tenth' },
+            { key: 'z', value: 'eleventh'},
+          ];
+
+          records.forEach(({ key, value}) => {
+            bst.insert(key, value);
+          });
+        });
+
+        const sortRecords = (records) => {
+          return records.sort((a, b) => a.key.localeCompare(b.key));
+        }
         // The first step for each of these tests will be to construct
         // a tree matching the scenario. How can you use your knowledge
         // of how insert works to do this? How can you check your work?
 
         it('can remove the record with the smallest key', () => {
-          // TODO:
-          // Insert several records
-          // Remove the record with the smallest key
-          // Ensure that looking up that key returns undefined
+          expect(bst.count()).toBe(11);
+          expect(bst.delete('a')).toBe('sixth');
+          expect(bst.lookup('a')).toBe(undefined);
+          expect(bst.count()).toBe(10);
+
+          const cb = jest.fn();
+          bst.forEach(cb);
+
+          records.splice(5, 1);
+          sortRecords(records).forEach(({ key, value }, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          });
         });
 
         it('can remove the record with the largest key', () => {
+          expect(bst.delete('z')).toBe('eleventh');
+          expect(bst.lookup('z')).toBe(undefined);
 
+          const cb = jest.fn();
+          bst.forEach(cb);
+
+          records.splice(10, 1);
+          sortRecords(records).forEach(({ key, value }, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          });
         });
 
         it('can remove the root', () => {
+          expect(bst.delete('o')).toBe('first');
+          expect(bst.lookup('o')).toBe(undefined);
 
+          const cb = jest.fn();
+          bst.forEach(cb);
+
+          records.splice(0, 1);
+          sortRecords(records).forEach(({ key, value }, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          });
         });
 
         it('can remove a node with no children', () => {
+          expect(bst.delete('k')).toBe('fifth');
+          expect(bst.lookup('k')).toBe(undefined);
 
+          const cb = jest.fn();
+          bst.forEach(cb);
+
+          records.splice(4, 1);
+          sortRecords(records).forEach(({ key, value }, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          });
         });
 
         it('can remove a node with only a left child', () => {
+          expect(bst.delete('d')).toBe('fourth');
+          expect(bst.lookup('d')).toBe(undefined);
 
+          records.splice(3, 1);
+
+          const cb = jest.fn();
+          bst.forEach(cb);
+
+          sortRecords(records).forEach(({ key, value }, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          });
         });
 
         it('can remove a node with only a right child', () => {
+          expect(bst.delete('y')).toBe('tenth');
+          expect(bst.lookup('y')).toBe(undefined);
 
+          records.splice(9, 1);
+          expect(records.length).toBe(10);
+
+          const cb = jest.fn();
+          bst.forEach(cb);
+
+          sortRecords(records).forEach(({ key, value }, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          });
         });
 
         it('can remove a node with both children, where the successor is the node\'s right child', () => {
+          expect(bst.delete('h')).toBe('second');
+          expect(bst.lookup('h')).toBe(undefined);
 
+          const cb = jest.fn();
+          bst.forEach(cb)
+
+          records.splice(1, 1);
+          sortRecords(records).forEach(({ key, value}, i) => {
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          })
         });
 
         it('can remove a node with both children, where the successor is not the node\'s right child', () => {
+          expect(bst.delete('t')).toBe('third');
+          // console.log("here", bst);
+          // console.log("_root", bst._root.key);
+          // console.log("R", bst._root.right.key);
+          // console.log("R, L", bst._root.right.left.key);
+          // console.log("R, R", bst._root.right.right.key);
+          console.log("count", bst.count());
 
+          let arr = [];
+          bst.forEach(el => arr.push(el));
+          console.log("***", arr);
+
+          expect(bst.lookup('t')).toBe(undefined);
+
+          const cb = jest.fn();
+          bst.forEach(cb)
+
+          records.splice(2, 1);
+          sortRecords(records).forEach(({ key, value}, i) => {
+            // console.log("iiiiii", i);
+            // console.log("^^^^", key);
+            expect(cb.mock.calls[i][0].key).toBe(key);
+            expect(cb.mock.calls[i][0].value).toBe(value);
+          })
         });
       });
     });
