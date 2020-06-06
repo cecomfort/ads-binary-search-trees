@@ -150,7 +150,7 @@ class BinarySearchTree {
         child = child.left;
       }
 
-      // 
+      //
       //
       // replacementNode = node.right;
       // let child = node.right;
@@ -177,9 +177,14 @@ class BinarySearchTree {
       node.left.parent = replacementNode;
 
       if (replacementNode != node.right) { // L most child of R node -> no children
+        if (replacementNode.right) {
+          replacementNode.right.parent = replacementNode.parent;
+        }
+        replacementNode.parent.left = replacementNode.right;
         replacementNode.right = node.right;
-        replacementNode.parent.left = undefined;
         node.right.parent = replacementNode;
+
+        // replacementNode.parent.left = replacementNode.right;
       }
 
     } else if (node.left) {
