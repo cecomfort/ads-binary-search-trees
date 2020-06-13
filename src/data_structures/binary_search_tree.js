@@ -16,16 +16,20 @@ class BinarySearchTree {
   }
 
   insert(key, value = true) {
+    return this._insertInternal(key, value);
+  }
+
+  _insertInternal(key, value = true) {
     let { node, parent } = this._findNodeAndParent(key);
 
-    if (node) {  // replace key if already exists in the tree
+    if (node?.key) {  // replace key if already exists in the tree
       node.value = value;
-      return node.value;
+      return node;
     }
     const newNode = new this.Node({key: key, value: value, parent: parent})
     this._count += 1;
 
-    if (parent) {
+    if (parent?.key) {
       if (key < parent.key) {
         parent.left = newNode;
       } else {
@@ -34,7 +38,7 @@ class BinarySearchTree {
     } else {
       this._root = newNode;
     }
-    return newNode.value;
+    return newNode;
 
     // Implementation 2
     // let node = this._getClosestNode(key);
@@ -115,7 +119,7 @@ class BinarySearchTree {
     let node = this._root;
     let parent = node?.parent;
 
-    while(node) {
+    while(node?.key) {
       if (key < node.key) {
         parent = node;
         node = node.left;
@@ -225,7 +229,7 @@ class BinarySearchTree {
     // to match the interface for Array.forEach:
     //   callback({ key, value }, i, this)
     const visitSubtree = (node, callback, i = 0) => {
-      if (node) {
+      if (node?.key) {
         i = visitSubtree(node.left, callback, i);
         callback({ key: node.key, value: node.value }, i, this);
         i = visitSubtree(node.right, callback, i + 1);

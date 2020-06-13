@@ -1,3 +1,5 @@
+import BinarySearchTree from './binary_search_tree';
+
 // Exported for the tests :(
 export class RBTNode {
   static BLACK = 'black';
@@ -20,23 +22,19 @@ export class RBTNode {
   }
 }
 
-class RedBlackTree {
-  constructor(Node = RBTNode) {
-    this.Node = Node;
-  }
-
-  lookup(key) {
-
+class RedBlackTree extends BinarySearchTree {
+  constructor() {
+    super(RBTNode);
   }
 
   /**
    * The two rotation functions are symetric, and could presumably
    * be collapsed into one that takes a direction 'left' or 'right',
    * calculates the opposite, and uses [] instead of . to access.
-   * 
+   *
    * Felt too confusing to be worth it. Plus I bet* the JIT optimizes two
    * functions with static lookups better than one with dynamic lookups.
-   * 
+   *
    * (*without any evidence whatsoever, 10 points to anyone who tries it out)
    */
   _rotateLeft(node) {
@@ -102,10 +100,64 @@ class RedBlackTree {
     node.parent = child;
   }
 
-  _insertInternal(key, value) {
-  }
-
   _insertRebalance(node) {
+    // how do we know parent exists?
+    // called after insert -> has root. root's parent is sentinel which is black
+    while (node.color === RBTNode.RED && node.parent.color === RBTNode.RED) {
+      let parent = node.parent;
+      const grandparent = parent.parent;
+
+      // possible that grandparent doesn't have a key? no because root is always black
+      if (parent === grandparent.left) { // parent is left child of grandparent
+        const uncle = grandparent.right;
+
+        if (uncle.color === RBTNode.RED) { // uncle and parent are both red
+          uncle.color = RBTNode.BLACK;
+          parent.color = RBTNode.BLACK;
+          grandparent.color = RBTNode.RED;
+          node = grandparent;
+        } else { // parent is red; uncle is black
+
+          if (node === parent.right) { // node is right child of parent
+            // force node to be left child
+            parent = node; // need this?
+            node = node.parent;
+            this._rotateLeft(node);
+          }
+
+          // node is left child of parent
+          parent.color = RBTNode.BLACK;
+          grandparent.color = RBTNode.RED;
+
+          this._rotateRight(grandparent);
+        }
+      } else { // parent is right child of grandparent
+        const uncle = grandparent.left;
+
+        if (uncle.color === RBTNode.RED) { // uncle and parent are both red
+          uncle.color = RBTNode.BLACK;
+          parent.color = RBTNode.BLACK;
+          grandparent.color = RBTNode.RED;
+          node = grandparent;
+        } else {
+
+          if (node === parent.left) {
+            // force node to be right child;
+            parent = node;
+            node = node.parent;
+            this._rotateRight(node);
+          }
+
+          // node is right child of parent
+          parent.color = RBTNode.BLACK;
+          grandparent.color = RBTNode.RED;
+
+          this._rotateLeft(grandparent);
+        }
+      }
+    }
+
+    this._root.color = RBTNode.BLACK;
   }
 
   insert(key, value) {
@@ -115,14 +167,6 @@ class RedBlackTree {
 
   delete(key) {
 
-  }
-
-  count() {
-
-  }
-
-  forEach(callback) {
-    
   }
 }
 
